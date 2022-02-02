@@ -11,7 +11,7 @@ namespace osuPNoteConverter
         static void Main(string[] args)
         {
             string filedir;
-            string Convert(string line)
+            static string Convert(string line)
             {
                 string[] segments = line.Split(',');
                 string[] segmentsSub = segments[segments.Length - 1].Split(':');
@@ -32,13 +32,12 @@ namespace osuPNoteConverter
             Console.Write("Insert filename here: ");
             filedir = Console.ReadLine();
             filedir = Directory.GetCurrentDirectory() + @"\" + filedir;
-            var fileStream = new FileStream(filedir, FileMode.Open, FileAccess.Read);
+            var fs = new FileStream(filedir, FileMode.Open, FileAccess.ReadWrite);
             File.Copy(filedir, filedir + ".backup", true);
             string[] lines;
             var list = new List<string>();
-
             //adding lines to a LIST
-            using (var streamReader = new StreamReader(fileStream, Encoding.UTF8))
+            using (var streamReader = new StreamReader(fs, Encoding.UTF8))
             {
                 string line;
                 while ((line = streamReader.ReadLine()) != null)
@@ -48,16 +47,13 @@ namespace osuPNoteConverter
             }
             lines = list.ToArray();
             //reading the LIST
-            var listout = new List<string>();
+            var sw = new StreamWriter(filedir, false);
+            sw.AutoFlush = true;
             foreach (var item in lines)
             {
-                Console.WriteLine(Convert(item));
-                listout.Add(Convert(item));
+                sw.WriteLine(Convert(item));
             }
-            File.WriteAllText(filedir, string.Empty);
-            string[] lineout = listout.ToArray();
-            File.WriteAllLines(filedir, lineout);
-            fileStream.Close();
+            fs.Close();
             Console.WriteLine("Press any key to exit.");
             Console.ReadKey();
         }
